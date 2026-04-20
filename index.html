@@ -1,499 +1,296 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoldFin - Laporan Finansial Pribadi</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+import React, { useState } from 'react';
+import { 
+  LayoutDashboard, 
+  Wallet, 
+  ArrowUpRight, 
+  ArrowDownLeft, 
+  History, 
+  Settings, 
+  Bell, 
+  Plus, 
+  CreditCard, 
+  Target,
+  MoreVertical,
+  ChevronRight,
+  TrendingUp,
+  Search,
+  Filter,
+  Sun,
+  Moon
+} from 'lucide-react';
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Mock data untuk statistik utama
+  const stats = [
+    { label: 'Total Saldo', value: 'Rp 45.250.000', icon: Wallet, trend: '+2.5%', color: 'text-amber-500' },
+    { label: 'Pemasukan Bulan Ini', value: 'Rp 12.000.000', icon: ArrowUpRight, trend: '+12%', color: 'text-green-500' },
+    { label: 'Pengeluaran Bulan Ini', value: 'Rp 5.420.000', icon: ArrowDownLeft, trend: '-5%', color: 'text-rose-500' },
+  ];
+
+  // Mock data untuk daftar transaksi
+  const transactions = [
+    { id: 1, name: 'Langganan Netflix', category: 'Hiburan', date: '24 Mei 2024', amount: '-Rp 186.000', status: 'Selesai' },
+    { id: 2, name: 'Gaji Bulanan', category: 'Pekerjaan', date: '22 Mei 2024', amount: '+Rp 8.500.000', status: 'Selesai' },
+    { id: 3, name: 'Belanja Mingguan', category: 'Kebutuhan', date: '20 Mei 2024', amount: '-Rp 1.250.000', status: 'Selesai' },
+    { id: 4, name: 'Investasi Emas', category: 'Investasi', date: '18 Mei 2024', amount: '-Rp 2.000.000', status: 'Diproses' },
+  ];
+
+  // Mock data untuk target menabung
+  const goals = [
+    { name: 'Liburan ke Jepang', target: 'Rp 30.000.000', current: 'Rp 12.500.000', progress: 42 },
+    { name: 'Dana Darurat', target: 'Rp 50.000.000', current: 'Rp 45.000.000', progress: 90 },
+  ];
+
+  // Komponen Helper untuk Glass Card yang Adaptif
+  const GlassCard = ({ children, className = "" }) => (
+    <div className={`
+      backdrop-blur-xl border transition-all duration-500 rounded-3xl
+      ${darkMode 
+        ? 'bg-slate-900/60 border-slate-800 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]' 
+        : 'bg-white/70 border-white/40 shadow-[0_8px_32px_0_rgba(212,175,55,0.08)]'}
+      ${className}
+    `}>
+      {children}
+    </div>
+  );
+
+  return (
+    <div className={`min-h-screen font-sans selection:bg-amber-500/30 transition-colors duration-500 ${darkMode ? 'bg-[#0A0A0C] text-slate-100' : 'bg-[#FDFCF8] text-slate-800'}`}>
+      
+      {/* Dekorasi Latar Belakang (Blob Animasi) */}
+      <div className={`fixed top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full blur-[120px] -z-10 transition-colors duration-700 ${darkMode ? 'bg-amber-900/20' : 'bg-amber-100/30'}`} />
+      <div className={`fixed bottom-[-5%] left-[-5%] w-[400px] h-[400px] rounded-full blur-[100px] -z-10 transition-colors duration-700 ${darkMode ? 'bg-indigo-950/20' : 'bg-amber-50'}`} />
+
+      <div className="flex h-screen overflow-hidden">
         
-        :root {
-            --gold-primary: #d97706;
-            --gold-light: #fbbf24;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Enhanced Glassmorphism Styles */
-        .glass-card {
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-        }
-
-        .dark-mode {
-            background-color: #050608;
-            color: #F8FAFC;
-        }
-
-        .light-mode {
-            background-color: #f7f6f2;
-            color: #1E293B;
-        }
-
-        /* Input Styling */
-        .glass-input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-        }
-        .light-mode .glass-input {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(217, 119, 6, 0.1);
-        }
-
-        /* Modal Background */
-        #profile-modal, #scan-loading-modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        /* Animations */
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-custom {
-            animation: spin 2s linear infinite;
-        }
-
-        .floating {
-            animation: floating 6s ease-in-out infinite;
-        }
-        @keyframes floating {
-            0% { transform: translate(0, 0px); }
-            50% { transform: translate(10px, 15px); }
-            100% { transform: translate(0, 0px); }
-        }
-    </style>
-</head>
-<body class="light-mode min-h-screen overflow-hidden">
-    <!-- Vivid Background Blobs -->
-    <div id="bg-blob-1" class="fixed top-[-15%] right-[-10%] w-[700px] h-[700px] bg-amber-400/20 rounded-full blur-[130px] -z-10 transition-all duration-1000 floating"></div>
-    <div id="bg-blob-2" class="fixed bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-amber-600/10 rounded-full blur-[120px] -z-10 transition-all duration-1000 floating" style="animation-delay: -2s;"></div>
-
-    <!-- Modal Scan Loading -->
-    <div id="scan-loading-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-lg">
-        <div class="glass-card p-10 rounded-[2.5rem] bg-white/10 border border-white/20 text-center space-y-6">
-            <div class="relative inline-block">
-                <div class="w-20 h-20 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin-custom"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <i data-lucide="scan" class="text-amber-500"></i>
-                </div>
+        {/* Sidebar Navigasi */}
+        <aside className={`w-72 hidden lg:flex flex-col border-r transition-colors duration-500 backdrop-blur-2xl ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-amber-100 bg-white/40'}`}>
+          <div className="p-8 flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-amber-400 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <TrendingUp className="text-white" size={24} />
             </div>
-            <div>
-                <h4 class="text-xl font-black text-white tracking-tight">Menganalisis Struk...</h4>
-                <p class="text-slate-400 text-xs mt-2">AI sedang mengekstrak data transaksi Anda</p>
-            </div>
-        </div>
-    </div>
+            <span className={`text-xl font-bold tracking-tight bg-gradient-to-r from-amber-500 to-amber-200 bg-clip-text text-transparent`}>
+              GoldFin
+            </span>
+          </div>
 
-    <!-- Modal Edit Profil -->
-    <div id="profile-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
-        <div class="glass-card w-full max-w-md p-8 rounded-[2.5rem] bg-white/70 border border-white/50 shadow-2xl overflow-hidden relative">
-            <div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-            <div class="relative z-10">
-                <h3 id="modal-title" class="text-2xl font-black text-slate-800 mb-6 tracking-tight">Pengaturan Profil</h3>
-                <div class="space-y-6">
-                    <div class="flex justify-center mb-6">
-                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center text-3xl font-black text-white shadow-xl" id="modal-avatar">B</div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Lengkap</label>
-                        <input type="text" id="edit-name-input" class="w-full glass-input px-5 py-3.5 rounded-2xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all text-slate-800" placeholder="Masukkan nama...">
-                    </div>
-                </div>
-                <div class="mt-10 flex gap-3">
-                    <button onclick="closeProfileModal()" class="flex-1 py-4 border border-white/40 bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-white/20 transition-all">Batal</button>
-                    <button onclick="saveProfile()" class="flex-1 py-4 bg-amber-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-700 shadow-lg shadow-amber-500/30 transition-all active:scale-95">Simpan Perubahan</button>
-                </div>
-            </div>
-        </div>
-    </div>
+          <nav className="flex-1 px-4 py-4 space-y-2">
+            {[
+              { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+              { id: 'wallet', icon: CreditCard, label: 'Dompet Saya' },
+              { id: 'history', icon: History, label: 'Riwayat' },
+              { id: 'goals', icon: Target, label: 'Target' },
+              { id: 'settings', icon: Settings, label: 'Pengaturan' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
+                  activeTab === item.id 
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/20' 
+                  : `${darkMode ? 'text-slate-400 hover:bg-slate-800/50 hover:text-amber-400' : 'text-slate-500 hover:bg-amber-50/50 hover:text-amber-700'}`
+                }`}
+              >
+                <item.icon size={20} />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            ))}
+          </nav>
 
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="w-72 hidden lg:flex flex-col border-r border-white/20 bg-white/10 backdrop-blur-3xl transition-all duration-500 z-50">
-            <div class="p-8 flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-tr from-amber-600 to-amber-400 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
-                    <i data-lucide="trending-up" class="text-white"></i>
-                </div>
-                <span id="logo-text" class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-amber-600 to-amber-400 bg-clip-text text-transparent">
-                    GoldFin
-                </span>
-            </div>
-
-            <nav class="flex-1 px-4 py-4 space-y-2">
-                <button class="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-white/20 border border-white/30 text-amber-700 shadow-sm backdrop-blur-md">
-                    <i data-lucide="layout-dashboard" size="20"></i>
-                    <span class="font-bold">Dashboard</span>
-                </button>
-                <button class="nav-item w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-500 hover:bg-white/20 hover:text-amber-700">
-                    <i data-lucide="credit-card" size="20"></i>
-                    <span class="font-medium">Dompet Saya</span>
-                </button>
-                <button class="nav-item w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-500 hover:bg-white/20 hover:text-amber-700">
-                    <i data-lucide="history" size="20"></i>
-                    <span class="font-medium">Riwayat</span>
-                </button>
-                <button class="nav-item w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-500 hover:bg-white/20 hover:text-amber-700">
-                    <i data-lucide="target" size="20"></i>
-                    <span class="font-medium">Target</span>
-                </button>
-            </nav>
-
-            <div class="p-6">
-                <div id="promo-card" class="p-5 rounded-3xl bg-white/20 border border-white/40 shadow-xl backdrop-blur-md transition-all duration-500">
-                    <p id="promo-title" class="text-sm font-bold text-slate-800 tracking-tight">Hai, <span id="sidebar-user-name">Budi</span>!</p>
-                    <p id="promo-desc" class="text-[11px] mt-1 text-slate-500 leading-relaxed">Gunakan fitur Scan Struk untuk pencatatan instan.</p>
-                </div>
-            </div>
+          <div className="p-6">
+            <GlassCard className={`p-5 border-amber-500/20 ${darkMode ? 'bg-slate-900/40' : 'bg-gradient-to-br from-amber-50/50 to-white/50'}`}>
+              <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center mb-3">
+                <TrendingUp size={16} className="text-amber-500" />
+              </div>
+              <p className={`text-sm font-bold tracking-tight ${darkMode ? 'text-amber-200' : 'text-amber-900'}`}>Analisis AI</p>
+              <p className={`text-[11px] mt-1 leading-relaxed ${darkMode ? 'text-slate-400' : 'text-amber-700/70'}`}>Lihat bagaimana pengeluaran Anda memengaruhi tabungan.</p>
+              <button className={`mt-4 w-full py-2 rounded-xl text-xs font-bold shadow-sm transition-all duration-300 ${darkMode ? 'bg-amber-500 text-slate-950 hover:bg-amber-400' : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-500 hover:text-white'}`}>
+                Lihat Laporan
+              </button>
+            </GlassCard>
+          </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 space-y-8">
-            <!-- Header -->
-            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 id="main-title" class="text-4xl font-black tracking-tight text-slate-800">Dashboard</h1>
-                    <p id="sub-title" class="text-slate-500 text-sm mt-1">Kelola keuangan Anda dengan teknologi AI.</p>
-                </div>
-                
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleDarkMode()" id="theme-btn" class="p-3 rounded-2xl border border-white/50 bg-white/30 glass-card text-slate-500 hover:text-amber-600 hover:scale-110 transition-all shadow-lg">
-                        <i id="theme-icon" data-lucide="moon"></i>
-                    </button>
-
-                    <div id="user-profile" onclick="openProfileModal()" class="flex items-center gap-3 bg-white/30 border border-white/50 p-1.5 pr-4 rounded-2xl shadow-lg glass-card cursor-pointer hover:bg-white/40 transition-all active:scale-95">
-                        <div id="header-avatar" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center font-bold text-white shadow-lg">B</div>
-                        <div class="hidden md:block">
-                            <p id="user-name" class="text-xs font-bold text-slate-800 leading-none">Budi Santoso</p>
-                            <p class="text-[10px] text-amber-600 font-black mt-1 uppercase tracking-tighter">Profil</p>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- 1. SALDO SAAT INI -->
-            <section>
-                <div class="glass-card p-10 rounded-[2.5rem] bg-gradient-to-br from-amber-600/10 to-amber-400/5 border border-white/50 relative overflow-hidden group">
-                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all duration-700"></div>
-                    
-                    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div>
-                            <p class="stat-label text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Saldo Total</p>
-                            <h2 id="display-balance" class="stat-value text-5xl md:text-6xl font-black text-slate-800 tracking-tighter">Rp 45.250.000</h2>
-                        </div>
-                        <div class="p-5 bg-amber-500/20 rounded-[2rem] text-amber-600 border border-amber-500/30">
-                            <i data-lucide="wallet" size="32"></i>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. PEMASUKAN & PENGELUARAN -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- PEMASUKAN -->
-                <div class="glass-card p-8 rounded-[2rem] bg-white/30 border border-white/50">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="p-3 bg-green-500/10 rounded-2xl text-green-600 border border-green-500/20">
-                            <i data-lucide="arrow-up-right"></i>
-                        </div>
-                        <div>
-                            <p class="stat-label text-[10px] font-black text-slate-400 uppercase tracking-widest">Pemasukan</p>
-                            <p id="display-income" class="stat-value text-2xl font-black text-slate-800">Rp 12.000.000</p>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 rounded-3xl bg-white/20 border border-white/30 shadow-inner">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Input Manual</label>
-                        <div class="flex gap-3">
-                            <input type="number" id="input-income" placeholder="0" class="flex-1 glass-input px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-green-400">
-                            <button onclick="updateFinance('income')" class="px-6 py-3 bg-green-600 text-white rounded-xl text-xs font-black hover:bg-green-700 transition-all shadow-lg active:scale-95">TAMBAH</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PENGELUARAN + OCR -->
-                <div class="glass-card p-8 rounded-[2rem] bg-white/30 border border-white/50">
-                    <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3 bg-rose-500/10 rounded-2xl text-rose-600 border border-rose-500/20">
-                                <i data-lucide="arrow-down-left"></i>
-                            </div>
-                            <div>
-                                <p class="stat-label text-[10px] font-black text-slate-400 uppercase tracking-widest">Pengeluaran</p>
-                                <p id="display-expense" class="stat-value text-2xl font-black text-slate-800">Rp 5.420.000</p>
-                            </div>
-                        </div>
-                        <!-- Tombol Scan Struk -->
-                        <div class="relative">
-                            <input type="file" id="receipt-upload" accept="image/*" class="hidden" onchange="handleReceiptScan(event)">
-                            <button onclick="document.getElementById('receipt-upload').click()" class="flex items-center gap-2 px-4 py-3 bg-amber-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-700 shadow-lg shadow-amber-500/30 transition-all active:scale-95">
-                                <i data-lucide="camera" size="14"></i> Scan Struk
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="p-6 rounded-3xl bg-white/20 border border-white/30 shadow-inner">
-                        <div class="flex justify-between items-center mb-3">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nominal Pengeluaran</label>
-                            <span id="ocr-badge" class="hidden text-[8px] font-black bg-amber-500 text-white px-2 py-0.5 rounded-full">HASIL SCAN</span>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex gap-3">
-                                <input type="number" id="input-expense" placeholder="0" class="flex-1 glass-input px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-rose-400">
-                                <button onclick="updateFinance('expense')" class="px-6 py-3 bg-rose-600 text-white rounded-xl text-xs font-black hover:bg-rose-700 transition-all shadow-lg active:scale-95">TAMBAH</button>
-                            </div>
-                            <input type="text" id="input-expense-desc" placeholder="Keterangan (opsional)" class="w-full glass-input px-4 py-2 rounded-xl text-xs font-medium focus:outline-none border-dashed">
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Riwayat Transaksi -->
-            <div class="glass-card overflow-hidden rounded-[2rem] bg-white/30 border border-white/50 shadow-xl mb-12">
-                <div class="p-8 flex justify-between items-center border-b border-white/20">
-                    <h3 class="table-title font-black text-2xl text-slate-800 tracking-tight">Riwayat Terakhir</h3>
-                    <button class="text-[10px] font-black text-amber-700 bg-white/40 border border-white/50 px-5 py-3 rounded-2xl hover:bg-white/60">UNDUH SEMUA</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="table-thead-bg bg-white/20 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                                <th class="px-8 py-6">Kategori</th>
-                                <th class="px-8 py-6">Keterangan</th>
-                                <th class="px-8 py-6">Jumlah</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transaction-body" class="divide-y divide-white/10">
-                            <!-- Transaksi baru akan muncul di sini -->
-                        </tbody>
-                    </table>
-                </div>
+        {/* Area Konten Utama */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 space-y-8 scroll-smooth">
+          
+          {/* Top Bar */}
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
+              <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Selamat datang kembali di laporan finansial Anda.</p>
             </div>
+            
+            <div className="flex items-center gap-3">
+              {/* Theme Toggle */}
+              <button 
+                onClick={() => setDarkMode(!darkMode)}
+                className={`p-2.5 rounded-2xl border transition-all shadow-sm ${darkMode ? 'bg-slate-900 border-slate-700 text-amber-400 hover:bg-slate-800' : 'bg-white border-amber-100 text-slate-400 hover:text-amber-600'}`}
+              >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+
+              <div className="relative group hidden sm:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-500 transition-colors" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Cari..." 
+                  className={`pl-10 pr-4 py-2.5 rounded-2xl text-sm focus:outline-none focus:ring-2 transition-all w-48 xl:w-64 border ${darkMode ? 'bg-slate-900 border-slate-700 focus:ring-amber-500/20 text-slate-100' : 'bg-white border-amber-100 focus:ring-amber-200 text-slate-800'}`}
+                />
+              </div>
+
+              <div className={`h-10 w-px mx-1 hidden md:block ${darkMode ? 'bg-slate-800' : 'bg-amber-100'}`}></div>
+              
+              <div className={`flex items-center gap-3 border p-1.5 pr-4 rounded-2xl shadow-sm cursor-pointer transition-colors ${darkMode ? 'bg-slate-900 border-slate-700 hover:bg-slate-800' : 'bg-white border-amber-100 hover:bg-amber-50/30'}`}>
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-amber-950 shadow-inner">
+                  B
+                </div>
+                <div className="hidden lg:block text-left">
+                  <p className="text-xs font-bold leading-none">Budi Santoso</p>
+                  <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-tighter font-bold">Premium</p>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Statistik Utama */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {stats.map((stat, idx) => (
+              <GlassCard key={idx} className="p-6 group hover:-translate-y-1">
+                <div className="flex items-start justify-between">
+                  <div className={`p-3.5 rounded-2xl shadow-sm border group-hover:scale-110 transition-all ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-amber-50'} ${stat.color}`}>
+                    <stat.icon size={26} />
+                  </div>
+                  <div className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${stat.trend.startsWith('+') ? 'bg-green-500/10 text-green-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                    {stat.trend}
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <p className={`text-[10px] font-black uppercase tracking-[0.15em] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{stat.label}</p>
+                  <p className="text-2xl font-black mt-1 tracking-tight">{stat.value}</p>
+                </div>
+              </GlassCard>
+            ))}
+          </section>
+
+          {/* Grid Grafik & Target */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <GlassCard className="lg:col-span-2 p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
+                <div>
+                  <h3 className="font-black text-xl tracking-tight">Arus Kas Bulanan</h3>
+                  <p className={`text-sm ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Statistik 6 bulan terakhir</p>
+                </div>
+                <select className={`rounded-xl text-xs font-bold px-3 py-2 outline-none focus:ring-2 border transition-colors ${darkMode ? 'bg-slate-800 border-slate-700 text-amber-400 focus:ring-amber-500/20' : 'bg-amber-50/50 border-amber-100 text-amber-800 focus:ring-amber-200'}`}>
+                  <option>Januari - Juni 2024</option>
+                  <option>Juli - Desember 2023</option>
+                </select>
+              </div>
+              
+              <div className="h-64 flex items-end justify-between gap-3 px-2">
+                {[40, 70, 45, 90, 65, 80].map((height, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
+                    <div className="w-full relative h-full flex items-end justify-center">
+                      <div className={`w-full sm:w-12 rounded-t-2xl transition-all duration-700 ${darkMode ? 'bg-slate-800/50 group-hover:bg-slate-800' : 'bg-amber-50 group-hover:bg-amber-100/50'}`} style={{ height: `${height}%` }}></div>
+                      <div 
+                        className="absolute bottom-0 w-full sm:w-12 bg-gradient-to-t from-amber-600 via-amber-400 to-amber-200 rounded-t-2xl transition-all duration-1000 ease-out shadow-lg shadow-amber-500/20"
+                        style={{ height: `${height - 15}%` }}
+                      ></div>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase tracking-tighter ${darkMode ? 'text-slate-600' : 'text-slate-400'}`}>Bln {i+1}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-black text-xl tracking-tight">Tabungan</h3>
+                <button className="bg-amber-500 text-slate-950 p-1.5 rounded-xl hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20 active:scale-90">
+                  <Plus size={18} />
+                </button>
+              </div>
+              <div className="space-y-8">
+                {goals.map((goal, idx) => (
+                  <div key={idx} className="space-y-3">
+                    <div className="flex justify-between items-end">
+                      <span className="block font-bold text-sm">{goal.name}</span>
+                      <span className="text-amber-500 font-black text-lg leading-none">{goal.progress}%</span>
+                    </div>
+                    <div className={`w-full h-3 rounded-full overflow-hidden border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-amber-50 border-amber-100/50'}`}>
+                      <div 
+                        className="h-full bg-gradient-to-r from-amber-600 to-amber-300 rounded-full transition-all duration-1000 relative"
+                        style={{ width: `${goal.progress}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
+                      <span className={darkMode ? 'text-slate-400' : 'text-slate-500'}>Tersimpan: {goal.current}</span>
+                      <span className="text-amber-500">{goal.target}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button className={`w-full mt-10 py-3.5 border-2 border-dashed rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${darkMode ? 'border-slate-700 text-slate-500 hover:border-amber-500/50 hover:text-amber-500' : 'border-amber-200 text-amber-700 hover:border-amber-400 hover:text-amber-800'}`}>
+                Lihat Detail Target
+              </button>
+            </GlassCard>
+          </div>
+
+          {/* Tabel Transaksi */}
+          <GlassCard className="overflow-hidden mb-12">
+            <div className={`p-8 flex items-center justify-between border-b ${darkMode ? 'bg-slate-900/40 border-slate-800' : 'bg-white/30 border-amber-50'}`}>
+              <h3 className="font-black text-xl tracking-tight">Riwayat Transaksi</h3>
+              <button className={`text-[10px] font-black flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700' : 'bg-amber-50 border-amber-100 text-amber-700 hover:bg-amber-100'}`}>
+                UNDUH LAPORAN <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className={`text-[10px] font-black uppercase tracking-[0.2em] ${darkMode ? 'bg-slate-900/60 text-slate-500' : 'bg-amber-50/40 text-slate-400'}`}>
+                    <th className="px-8 py-5">Kategori</th>
+                    <th className="px-8 py-5">Deskripsi</th>
+                    <th className="px-8 py-5">Tanggal</th>
+                    <th className="px-8 py-5">Nominal</th>
+                    <th className="px-8 py-5 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${darkMode ? 'divide-slate-800' : 'divide-amber-50/50'}`}>
+                  {transactions.map((t) => (
+                    <tr key={t.id} className={`group transition-colors ${darkMode ? 'hover:bg-slate-800/30' : 'hover:bg-amber-50/10'}`}>
+                      <td className="px-8 py-5">
+                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border shadow-sm transition-colors ${darkMode ? 'bg-slate-900 border-slate-700 text-amber-400' : 'bg-white border-amber-100 text-amber-700'}`}>
+                          {t.category}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5">
+                        <p className="font-bold text-sm">{t.name}</p>
+                        <p className={`text-[10px] mt-0.5 font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{t.status}</p>
+                      </td>
+                      <td className={`px-8 py-5 text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{t.date}</td>
+                      <td className={`px-8 py-5 text-sm font-black ${t.amount.startsWith('+') ? 'text-green-500' : (darkMode ? 'text-slate-100' : 'text-slate-700')}`}>
+                        {t.amount}
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <button className="text-slate-500 hover:text-amber-500 transition-all">
+                          <MoreVertical size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </GlassCard>
         </main>
+      </div>
     </div>
+  );
+};
 
-    <!-- Scripting -->
-    <script>
-        lucide.createIcons();
-
-        // Gemini API Configuration
-        const apiKey = ""; // API Key disediakan lingkungan saat runtime
-
-        // Global State
-        let currentUserName = "Budi Santoso";
-        let balance = 45250000;
-        let income = 12000000;
-        let expense = 5420000;
-
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                maximumFractionDigits: 0
-            }).format(number);
-        }
-
-        function updateUI() {
-            document.getElementById('display-balance').innerText = formatRupiah(balance);
-            document.getElementById('display-income').innerText = formatRupiah(income);
-            document.getElementById('display-expense').innerText = formatRupiah(expense);
-            
-            document.getElementById('user-name').innerText = currentUserName;
-            document.getElementById('sidebar-user-name').innerText = currentUserName.split(' ')[0];
-            document.getElementById('header-avatar').innerText = currentUserName.charAt(0);
-            document.getElementById('modal-avatar').innerText = currentUserName.charAt(0);
-        }
-
-        // Logic OCR via Gemini API
-        async function handleReceiptScan(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Show Loading Modal
-            document.getElementById('scan-loading-modal').classList.remove('hidden');
-
-            try {
-                const base64Data = await fileToBase64(file);
-                const result = await callGeminiOCR(base64Data);
-                
-                if (result) {
-                    const { amount, category, description } = result;
-                    
-                    // Populate inputs
-                    document.getElementById('input-expense').value = amount;
-                    document.getElementById('input-expense-desc').value = description || category || "";
-                    
-                    // Show Badge
-                    const badge = document.getElementById('ocr-badge');
-                    badge.classList.remove('hidden');
-                    setTimeout(() => badge.classList.add('hidden'), 5000);
-                }
-            } catch (error) {
-                console.error("OCR Error:", error);
-                alert("Gagal memproses struk. Pastikan gambar jelas dan coba lagi.");
-            } finally {
-                document.getElementById('scan-loading-modal').classList.add('hidden');
-                event.target.value = ""; // Clear file input
-            }
-        }
-
-        async function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        async function callGeminiOCR(base64Image) {
-            const prompt = "Analyze this receipt image. Extract the total amount as a number, a relevant category (e.g. Food, Transport, Shopping), and a short description. Return ONLY a valid JSON object like this: {\"amount\": 150000, \"category\": \"Food\", \"description\": \"Lunch at Cafe\"}. Do not include markdown formatting or other text.";
-            
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inlineData: { mimeType: "image/png", data: base64Image } }
-                    ]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
-            };
-
-            let retries = 5;
-            let delay = 1000;
-
-            while (retries > 0) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    return JSON.parse(text);
-                } catch (e) {
-                    retries--;
-                    if (retries === 0) throw e;
-                    await new Promise(r => setTimeout(r, delay));
-                    delay *= 2;
-                }
-            }
-        }
-
-        // Financial Logic
-        function updateFinance(type) {
-            const inputId = type === 'income' ? 'input-income' : 'input-expense';
-            const descId = type === 'expense' ? 'input-expense-desc' : null;
-            const inputEl = document.getElementById(inputId);
-            const descEl = descId ? document.getElementById(descId) : null;
-            
-            const value = parseInt(inputEl.value);
-            const description = descEl ? descEl.value.trim() : "Input Manual";
-
-            if (isNaN(value) || value <= 0) {
-                alert("Mohon masukkan nominal yang valid");
-                return;
-            }
-
-            if (type === 'income') {
-                income += value;
-                balance += value;
-                addTransactionRow('PEMASUKAN', 'Manual', value, 'text-green-600');
-            } else {
-                expense += value;
-                balance -= value;
-                addTransactionRow('PENGELUARAN', description || 'Belanja', -value, 'text-slate-800');
-            }
-
-            inputEl.value = '';
-            if(descEl) descEl.value = '';
-            updateUI();
-        }
-
-        function addTransactionRow(cat, desc, val, colorClass) {
-            const tbody = document.getElementById('transaction-body');
-            const row = document.createElement('tr');
-            row.className = "hover:bg-white/20 transition-colors group";
-            row.innerHTML = `
-                <td class="px-8 py-6">
-                    <span class="category-badge px-4 py-2 rounded-xl border border-white/50 bg-white/30 text-[10px] font-black ${colorClass === 'text-green-600' ? 'text-green-700' : 'text-amber-700'} shadow-sm backdrop-blur-sm">${cat}</span>
-                </td>
-                <td class="px-8 py-6">
-                    <p class="transaction-name font-bold text-slate-800">${desc}</p>
-                    <p class="transaction-status text-[10px] text-slate-400 font-bold uppercase">Success</p>
-                </td>
-                <td class="px-8 py-6 text-base font-black ${colorClass} tracking-tight">${formatRupiah(val)}</td>
-            `;
-            tbody.prepend(row);
-        }
-
-        // Profile Logic
-        function openProfileModal() {
-            document.getElementById('edit-name-input').value = currentUserName;
-            document.getElementById('profile-modal').classList.remove('hidden');
-        }
-
-        function closeProfileModal() {
-            document.getElementById('profile-modal').classList.add('hidden');
-        }
-
-        function saveProfile() {
-            const newName = document.getElementById('edit-name-input').value.trim();
-            if (newName) {
-                currentUserName = newName;
-                updateUI();
-                closeProfileModal();
-            }
-        }
-
-        // Theme Toggle Logic
-        let isDarkMode = false;
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            const body = document.body;
-            const themeIcon = document.getElementById('theme-icon');
-            const sidebar = document.getElementById('sidebar');
-            const glassCards = document.querySelectorAll('.glass-card');
-            const textSlate800 = document.querySelectorAll('.text-slate-800');
-
-            if (isDarkMode) {
-                body.classList.replace('light-mode', 'dark-mode');
-                themeIcon.setAttribute('data-lucide', 'sun');
-                sidebar.classList.replace('bg-white/10', 'bg-black/40');
-                glassCards.forEach(card => card.classList.replace('bg-white/30', 'bg-white/5'));
-                textSlate800.forEach(el => el.classList.replace('text-slate-800', 'text-white'));
-                document.querySelectorAll('.text-slate-500').forEach(el => el.classList.replace('text-slate-500', 'text-slate-400'));
-            } else {
-                body.classList.replace('dark-mode', 'light-mode');
-                themeIcon.setAttribute('data-lucide', 'moon');
-                sidebar.classList.replace('bg-black/40', 'bg-white/10');
-                glassCards.forEach(card => card.classList.replace('bg-white/5', 'bg-white/30'));
-                const textWhite = document.querySelectorAll('.text-white:not(i):not(button)');
-                textWhite.forEach(el => { if(!el.classList.contains('bg-gradient-to-r')) el.classList.replace('text-white', 'text-slate-800'); });
-                document.querySelectorAll('.text-slate-400').forEach(el => el.classList.replace('text-slate-400', 'text-slate-500'));
-            }
-            lucide.createIcons();
-        }
-
-        // Init
-        updateUI();
-    </script>
-</body>
-</html>
+export default App;
